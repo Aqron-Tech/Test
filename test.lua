@@ -1,27 +1,38 @@
 -- =============================================================================
--- 1. TARGET THE PLAYER (Server-Compatible)
+-- 1. WAIT FOR THE PLAYER TO FULLY LOAD
 -- =============================================================================
 local Players = game:GetService("Players")
 
--- Grabs the first player currently loaded in your Studio playtest session
+-- If the game is still booting up, wait until at least one player exists
+if #Players:GetPlayers() == 0 then
+	Players.PlayerAdded:Wait()
+end
+
 local targetPlayer = Players:GetPlayers()[1] 
 
 if not targetPlayer then 
-	warn("No player found in the game to show the UI to! Make sure you are in Play mode.")
+	warn("❌ ERROR: No player found! Make sure you clicked 'Play' in Studio.")
 	return 
+end
+
+-- Wait until the player's UI folder is ready
+local playerGui = targetPlayer:WaitForChild("PlayerGui", 10)
+if not playerGui then
+	warn("❌ ERROR: PlayerGui timed out!")
+	return
 end
 
 -- =============================================================================
 -- 2. CREATE THE MAIN SCREEN UI CONTAINER
 -- =============================================================================
 -- Clean up any old test UI if it already exists so they don't stack up
-local oldGui = targetPlayer:WaitForChild("PlayerGui"):FindFirstChild("TestNotificationGui")
+local oldGui = playerGui:FindFirstChild("TestNotificationGui")
 if oldGui then oldGui:Destroy() end
 
 local screenGui = Instance.new("ScreenGui")
 screenGui.Name = "TestNotificationGui"
 screenGui.ResetOnSpawn = false
-screenGui.Parent = targetPlayer:WaitForChild("PlayerGui")
+screenGui.Parent = playerGui
 
 -- =============================================================================
 -- 3. CREATE THE BACKGROUND TAB (The Frame)
@@ -54,7 +65,7 @@ messageText.Parent = tabFrame
 -- =============================================================================
 -- 5. ANIMATE THE TAB (Tweening)
 -- =============================================================================
-task.wait(0.5) -- Tiny pause to let the environment settle
+task.wait(0.2) -- Tiny pause to let the environment settle
 
 -- Smoothly slide down from the sky to the top center of the screen
 tabFrame:TweenPosition(
