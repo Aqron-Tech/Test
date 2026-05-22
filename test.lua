@@ -1,7 +1,13 @@
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 
+-- FIX 1: Ensure localPlayer is found before moving forward
 local localPlayer = Players.LocalPlayer
+while not localPlayer do
+    task.wait()
+    localPlayer = Players.LocalPlayer
+end
+
 local playerGui = localPlayer:WaitForChild("PlayerGui")
 
 local screenGui = Instance.new("ScreenGui")
@@ -11,7 +17,8 @@ screenGui.Parent = playerGui
 
 local minimapFrame = Instance.new("Frame")
 minimapFrame.Name = "MinimapFrame"
-minimapFrame.Size = UUD2.new(0, 150, 0, 150)
+-- FIX 2: Fixed typo from UUD2 to UDim2
+minimapFrame.Size = UDim2.new(0, 150, 0, 150) 
 minimapFrame.Position = UDim2.new(0, 20, 1, -170)
 minimapFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 minimapFrame.BorderSizePixel = 2
