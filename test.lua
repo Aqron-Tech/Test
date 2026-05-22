@@ -1,5 +1,6 @@
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
 
 if #Players:GetPlayers() == 0 then Players.PlayerAdded:Wait() end
 local targetPlayer = Players:GetPlayers()[1] 
@@ -41,7 +42,7 @@ headerCorner.Parent = headerBar
 local uigradient = Instance.new("UIGradient")
 uigradient.Rotation = 90
 uigradient.Color = ColorSequence.new({
-	ColorSequenceKeypoint.new(0, Color3.fromRGB(240, 110, 15)),
+	ColorSequenceKeypoint.new(0, Color3.fromRGB(240, 180, 15)),
 	ColorSequenceKeypoint.new(1, Color3.fromRGB(15, 15, 15))
 })
 uigradient.Parent = headerBar
@@ -93,7 +94,7 @@ local function CreateNewTab(tabName)
 	pageFrame.BackgroundTransparency = 1
 	pageFrame.BorderSizePixel = 0
 	pageFrame.ScrollBarThickness = 4
-	pageFrame.ScrollBarImageColor3 = Color3.fromRGB(240, 110, 15)
+	pageFrame.ScrollBarImageColor3 = Color3.fromRGB(240, 180, 15)
 	pageFrame.Visible = firstTab
 	pageFrame.Parent = containerWindow
 
@@ -110,7 +111,7 @@ local function CreateNewTab(tabName)
 	local tabButton = Instance.new("TextButton")
 	tabButton.Name = tabName .. "Btn"
 	tabButton.Size = UDim2.new(1, 0, 0, 32)
-	tabButton.BackgroundColor3 = firstTab and Color3.fromRGB(240, 110, 15) or Color3.fromRGB(25, 25, 25)
+	tabButton.BackgroundColor3 = firstTab and Color3.fromRGB(240, 180, 15) or Color3.fromRGB(25, 25, 25)
 	tabButton.Text = tabName
 	tabButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 	tabButton.Font = Enum.Font.GothamMedium
@@ -132,24 +133,92 @@ local function CreateNewTab(tabName)
 			end
 		end
 		pageFrame.Visible = true
-		TweenService:Create(tabButton, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(240, 110, 15)}):Play()
+		TweenService:Create(tabButton, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(240, 180, 15)}):Play()
 	end)
 
 	firstTab = false
 	return pageFrame
 end
 
-local combatPage  = CreateNewTab("Combat")
+local function CreateCheckbox(parentPage, textName, callback)
+	local checkboxFrame = Instance.new("Frame")
+	checkboxFrame.Size = UDim2.new(0, 350, 0, 30)
+	checkboxFrame.BackgroundTransparency = 1
+	checkboxFrame.Parent = parentPage
+
+	local box = Instance.new("TextButton")
+	box.Size = UDim2.new(0, 18, 0, 18)
+	box.Position = UDim2.new(0, 0, 0.5, -9)
+	box.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+	box.BorderSizePixel = 1
+	box.BorderColor3 = Color3.fromRGB(60, 60, 60)
+	box.Text = ""
+	box.Parent = checkboxFrame
+
+	local boxCorner = Instance.new("UICorner")
+	boxCorner.CornerRadius = UDim.new(0, 4)
+	boxCorner.Parent = box
+
+	local label = Instance.new("TextLabel")
+	label.Size = UDim2.new(1, -30, 1, 0)
+	label.Position = UDim2.new(0, 28, 0, 0)
+	label.BackgroundTransparency = 1
+	label.Text = textName
+	label.TextColor3 = Color3.fromRGB(200, 200, 200)
+	label.Font = Enum.Font.Gotham
+	label.TextSize = 14
+	label.TextXAlignment = Enum.TextXAlignment.Left
+	label.Parent = checkboxFrame
+
+	local enabled = false
+	box.MouseButton1Click:Connect(function()
+		enabled = not enabled
+		if enabled then
+			TweenService:Create(box, TweenInfo.new(0.15), {BackgroundColor3 = Color3.fromRGB(240, 180, 15)}):Play()
+			box.Text = "✓"
+			box.TextColor3 = Color3.fromRGB(0, 0, 0)
+		else
+			TweenService:Create(box, TweenInfo.new(0.15), {BackgroundColor3 = Color3.fromRGB(30, 30, 30)}):Play()
+			box.Text = ""
+		end
+		if callback then
+			callback(enabled)
+		end
+	end)
+end
+
+local combatPage = CreateNewTab("Combat")
 local movementPage = CreateNewTab("Movement")
-local visualsPage  = CreateNewTab("Visuals")
+local visualsPage = CreateNewTab("Visuals")
 local settingsPage = CreateNewTab("Settings")
 
-local exampleLabel = Instance.new("TextLabel")
-exampleLabel.Size = UDim2.new(0, 300, 0, 30)
-exampleLabel.BackgroundTransparency = 1
-exampleLabel.Text = "Add your custom check-boxes or scripts here!"
-exampleLabel.TextColor3 = Color3.fromRGB(150, 150, 150)
-exampleLabel.Font = Enum.Font.Gotham
-exampleLabel.TextSize = 14
-exampleLabel.TextXAlignment = Enum.TextXAlignment.Left
-exampleLabel.Parent = combatPage
+CreateCheckbox(combatPage, "Aimbot", function(state)
+	print("Aimbot status:", state)
+end)
+
+CreateCheckbox(combatPage, "Triggerbot", function(state)
+	print("Triggerbot status:", state)
+end)
+
+CreateCheckbox(movementPage, "Fly Hack", function(state)
+	print("Fly status:", state)
+end)
+
+CreateCheckbox(movementPage, "Noclip", function(state)
+	print("Noclip status:", state)
+end)
+
+CreateCheckbox(visualsPage, "2D Box ESP", function(state)
+	print("ESP status:", state)
+end)
+
+CreateCheckbox(visualsPage, "Show FOV Circle", function(state)
+	print("FOV status:", state)
+end)
+
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+	if gameProcessed then return end
+	if input.KeyCode == Enum.KeyCode.RightShift then
+		mainFrame.Visible = not mainFrame.Visible
+	end
+end)
